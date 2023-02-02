@@ -462,8 +462,238 @@ trip_fact5.display()
 
 # COMMAND ----------
 
-final_trip_fact = trip_fact5.select('trip_id', 'rider_id', 'bike_id', 'start_station_id', 'end_station_id', 'started_at_date_id', 'ended_at_date_id', 'started_at_time_id', 'ended_at_time_id', 'rider_age', 'trip_duration')
-final_trip_fact.display()
+trip_fact = trip_fact5.select('trip_id', 'rider_id', 'bike_id', 'start_station_id', 'end_station_id', 'started_at_date_id', 'ended_at_date_id', 'started_at_time_id', 'ended_at_time_id', 'rider_age', 'trip_duration')
+trip_fact = trip_fact.withColumn('trip_duration', col('trip_duration').cast('int'))
+trip_fact.display()
+
+# COMMAND ----------
+
+station_dim = s_station_df
+rider_dim = s_rider_df
+
+# COMMAND ----------
+
+trip_fact.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/fact_trip")
+payment_fact.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/fact_payment")
+
+bike_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_bike")
+date_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_date")
+time_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_time")
+rider_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_rider")
+station_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_station")
+
+# COMMAND ----------
+
+dbutils.fs.rm("/tmp/Rupesh/Gold/", True)
+
+# COMMAND ----------
+
+# MAGIC %md #Business Outcomes
+
+# COMMAND ----------
+
+trip_fact = spark.read.format("delta").load("/tmp/Rupesh/Gold/fact_trip")
+payment_fact = spark.read.format("delta").load("/tmp/Rupesh/Gold/fact_payment")
+
+bike_dim = spark.read.format("delta").load("/tmp/Rupesh/Gold/dim_bike")
+date_dim = spark.read.format("delta").load("/tmp/Rupesh/Gold/dim_date")
+time_dim = spark.read.format("delta").load("/tmp/Rupesh/Gold/dim_time")
+rider_dim = spark.read.format("delta").load("/tmp/Rupesh/Gold/dim_rider")
+station_dim = spark.read.format("delta").load("/tmp/Rupesh/Gold/dim_station")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Analyse how much time is spent per ride
+
+# COMMAND ----------
+
+# MAGIC %md 
+# MAGIC ### Based on date and time factors such as day of week and time of day
+
+# COMMAND ----------
+
+# day of week
+dow = trip_fact.select('trip_duration', 'started_at_date_id')
+dow = dow.join(date_dim, dow.started_at_date_id == date_dim.date_id, how='inner').drop('started_at_date_id')
+dow.display()
+
+# COMMAND ----------
+
+from pyspark.sql.functions import date_format
+from pyspark.sql.functions import col, avg
+
+dow = dow.withColumn('date', date_format(col('date'), 'EEEE'))
+dow.display()
+
+# COMMAND ----------
+
+dow_grouped = dow.groupBy('date').agg(avg('trip_duration'))
+dow_grouped = dow_grouped.withColumnRenamed('date', 'day_of_week')
+dow_grouped.display()
+
+# COMMAND ----------
+
+# hour
+hr = trip_fact.select('trip_duration', 'started_at_time_id')
+hr = hr.join(time_dim, hr.started_at_time_id == time_dim.time_id, how='inner').drop('started_at_time_id')
+hr.display()
+
+# COMMAND ----------
+
+from pyspark.sql.functions import hour
+
+hr = hr.withColumn('time', hour(col('time')))
+hr.display()
+
+# COMMAND ----------
+
+hr_grouped = hr.groupBy('time').agg(avg('trip_duration'))
+hr_grouped = hr_grouped.withColumnRenamed('time', 'hour_of_day')
+hr_grouped.display()
+
+# COMMAND ----------
+
+# MAGIC %md ### Based on which station is the starting and / or ending station
+
+# COMMAND ----------
+
+stns = trip_fact.select('trip_duration', 'start_station_id', 'end_station_id')
+start_stns = stns.groupBy('start_station_id').agg(avg('trip_duration'))
+end_stns = stns.groupBy('end_station_id').agg(avg('trip_duration'))
+
+# COMMAND ----------
+
+start_stns = start_stns.join(station_dim, start_stns.start_station_id == station_dim.station_id, how='left').select('name', 'avg(trip_duration)').withColumnRenamed('name', 'start_station')
+start_stns.display()
+
+# COMMAND ----------
+
+end_stns = end_stns.join(station_dim, end_stns.end_station_id == station_dim.station_id, how='left').select('name', 'avg(trip_duration)').withColumnRenamed('name', 'end_station')
+end_stns.display()
+
+# COMMAND ----------
+
+# MAGIC %md ### Based on age of the rider at time of the ride
+
+# COMMAND ----------
+
+age = trip_fact.groupBy('rider_age').agg(avg('trip_duration'))
+age.display()
+
+# COMMAND ----------
+
+# MAGIC %md ### Based on whether the rider is a member or a casual rider
+
+# COMMAND ----------
+
+member = trip_fact.join(rider_dim, on='rider_id', how='left').select('trip_duration', 'is_member')
+member_grouped = member.groupBy('is_member').agg(avg('trip_duration'))
+member_grouped.display()
+
+# COMMAND ----------
+
+# MAGIC %md ## Analyse how much money is spent
+
+# COMMAND ----------
+
+# MAGIC %md ### per month
+
+# COMMAND ----------
+
+from pyspark.sql.functions import date_format, sum, month, substring
+from pyspark.sql.types import StringType, DateType
+
+per_month = payment_fact.join(date_dim, on='date_id', how='left').select('amount', 'date')
+per_month1 = per_month.withColumn('month', date_format(per_month['date'], 'MMMM'))#.cast(StringType()))
+per_month_grouped = per_month1.groupBy('month').agg(sum('amount'))
+per_month_grouped.display()
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md ### per Quarter
+
+# COMMAND ----------
+
+from pyspark.sql.functions import quarter, sum, when
+
+#per_month_grouped3 = per_month_grouped2.withColumn('month', col('month').cast('int'))
+#pm = per_month_grouped3
+#per_month_grouped3 = per_month_grouped.withColumn('month')
+
+
+perQ = per_month.withColumn('quarter', quarter(col('date')))
+perQ = perQ.groupBy('quarter').agg(sum('amount'))
+perQ.display()
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md ### per Year
+
+# COMMAND ----------
+
+py = per_month.withColumn('year', date_format(per_month['date'], 'yyyy'))
+py_grouped = py.groupBy('year').agg(sum('amount'))
+py_grouped.display()
+
+# COMMAND ----------
+
+# MAGIC %md ### per member based on age of rider at account start
+
+# COMMAND ----------
+
+from pyspark.sql.functions import datediff, col
+import math
+
+# COMMAND ----------
+
+ages = rider_dim.withColumn('age_at_start', (datediff(col('account_start'), col('birthday'))/365).cast('int')).select('rider_id', 'age_at_start')
+ages.display()
+
+# COMMAND ----------
+
+ar = payment_fact.join(ages, on='rider_id', how='left').select('rider_id', 'age_at_start', 'amount')
+ar.display()
+
+# COMMAND ----------
+
+ar_grouped = ar.groupBy('age_at_start').agg(sum('amount'))
+ar_grouped.display()
+
+# COMMAND ----------
+
+# MAGIC %md ## Analyse how much money is spent per member
+
+# COMMAND ----------
+
+# MAGIC %md ### Based on how many rides the rider averages per month
+
+# COMMAND ----------
+
+col = ['rides per month', 'amount']
+payment_fact.display()
+
+# COMMAND ----------
+
+print(payment_fact.agg({'amount': 'sum'}).collect()[0][0])
+
+# COMMAND ----------
+
+assert payment_fact.agg({'amount': 'sum'}).collect()[0][0] == 19457105.250142574
+
+# COMMAND ----------
+
+assert payment_fact.agg({'amount': 'sum'}).collect()[0][0] == 19457105.250142574, 'Payment amount sum wrong'
+print('df')
 
 # COMMAND ----------
 
