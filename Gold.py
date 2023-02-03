@@ -79,13 +79,26 @@ def make_time_dimension():
 
 # COMMAND ----------
 
+## station dimension table
+def make_station_dimension():
+    return s_station_df
+
+# COMMAND ----------
+
+## rider dimension table
+def make_rider_dimension():
+    return s_rider_df
+
+# COMMAND ----------
+
 ## Payment fact table
-def make_payment_fact():
+def make_payment_fact(date_dim):
     payment_fact = s_payment_df.join(date_dim, on='date', how='left').select('payment_id', 'rider_id', 'date_id', 'amount')
     return payment_fact
 
 # COMMAND ----------
 
+##trip fact table
 def make_trip_fact(bike_dim, date_dim, time_dim):
     # trip duration
     trip_fact = s_trip_df.withColumn('trip_duration', (unix_timestamp(col('ended_at')) - unix_timestamp(col('started_at')))/60)
@@ -125,11 +138,39 @@ def make_trip_fact(bike_dim, date_dim, time_dim):
 
 # COMMAND ----------
 
-b = make_bike_dimension()
-d = make_date_dimension()
-t = make_time_dimension()
-t = make_trip_fact(b, d, t)
-t.display()
+def make_gold_schema():
+    b = make_bike_dimension()
+    d = make_date_dimension()
+    ti = make_time_dimension()
+    s = make_station_dimension()
+    r = make_rider_dimension()
+    
+    tr = make_trip_fact(b, d, ti)
+    p = make_payment_fact(d)
+    
+    return b, d, ti, s, r, tr, p
+    
+
+# COMMAND ----------
+
+bike_dim, date_dim, time_dim, station_dim, rider_dim, trip_fact, payment_fact = make_gold_schema()
+
+# COMMAND ----------
+
+def write_to_gold():
+    dbutils.fs.rm("/tmp/Rupesh/Gold/", True)
+    trip_fact.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/fact_trip")
+    payment_fact.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/fact_payment")
+
+    bike_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_bike")
+    date_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_date")
+    time_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_time")
+    rider_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_rider")
+    station_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_station")
+
+# COMMAND ----------
+
+write_to_gold()
 
 # COMMAND ----------
 
