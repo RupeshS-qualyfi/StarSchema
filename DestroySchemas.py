@@ -4,3 +4,7 @@
 # COMMAND ----------
 
 dbutils.fs.rm('/tmp/Rupesh/', True)
+
+# COMMAND ----------
+
+

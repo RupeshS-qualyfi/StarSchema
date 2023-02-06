@@ -11,7 +11,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/SchemaCreation
+# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/Schemas
 
 # COMMAND ----------
 
@@ -24,6 +24,7 @@ def assert_gold_schemas():
     assert time_dim.schema == g_time_schema, 'time dimension schema mismatch'
     assert rider_dim.schema == g_rider_schema, 'rider dimension schema mismatch'
     assert station_dim.schema == g_station_schema, 'station dimension schema mismatch'
+    return 0
     
 assert_gold_schemas()
 
@@ -59,6 +60,8 @@ def assert_1b():
     
     assert one_b_1.count() == 74, 'length of start df wrong'
     assert one_b_2.count() == 67, 'length of end df wrong'
+    
+    return 0
 assert_1b()
 
 # COMMAND ----------
@@ -71,7 +74,8 @@ def assert_1c():
     one_c = time_per_age()
     max_age = one_c.agg({'rider_age': 'max'}).collect()[0][0]
     assert max_age <= 71, 'oldest rider is older than 71 which is false'
-    
+    return 0
+
 assert_1c()
 
 # COMMAND ----------
@@ -83,6 +87,9 @@ assert_1c()
 def assert_1d():
     df = time_per_membership()
     assert df.count() == 2, 'there are more than 2 rows which is wrong, (true, false) only'
+    return 0
+  
+assert_1d()
 
 # COMMAND ----------
 
@@ -131,7 +138,7 @@ assert_3a()
 
 # COMMAND ----------
 
-# MAGIC %md #### EXTRA CREDIT 3a. Analyze how much money is spent per member based on how many minutes the rider spends on a bike per month
+# MAGIC %md #### EXTRA CREDIT 3b. Analyze how much money is spent per member based on how many minutes the rider spends on a bike per month
 
 # COMMAND ----------
 

@@ -1,158 +1,94 @@
 # Databricks notebook source
-#Creating the schemas for Bronze, Silver, Gold
+# MAGIC %md # Create empty dataframes with schemas
 
 # COMMAND ----------
 
+# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/Schemas
+
+# COMMAND ----------
+
+# MAGIC %md ## Bronze
+
+# COMMAND ----------
+
+# create empty df
 from pyspark.sql.types import *
 
-# COMMAND ----------
+df = sc.emptyRDD()
 
-## Bronze Schema
+trip_df = spark.createDataFrame(df, b_trip_schema)
 
-# COMMAND ----------
+payment_df = spark.createDataFrame(df, b_payment_schema)
 
-# define the schema for the trip table
-b_trip_schema = StructType([
-    StructField("trip_id", StringType(), True),
-    StructField("rideable_type", StringType(), True),
-    StructField("started_at", StringType(), True),
-    StructField("ended_at", StringType(), True),
-    StructField("start_station_id", StringType(), True),
-    StructField("end_station_id", StringType(), True),
-    StructField("rider_id", StringType(), True)
-])
+station_df = spark.createDataFrame(df, b_station_schema)
 
-# define the schema for the payment table
-b_payment_schema = StructType([
-    StructField("payment_id", StringType(), True),
-    StructField("date", StringType(), True),
-    StructField("amount", StringType(), True),
-    StructField("rider_id", StringType(), True)
-])
-
-# define the schema for the station table
-b_station_schema = StructType([
-    StructField("station_id", StringType(), True),
-    StructField("name", StringType(), True),
-    StructField("longitude", StringType(), True),
-    StructField("latitude", StringType(), True)
-])
-
-# define the schema for the rider table
-b_rider_schema = StructType([
-    StructField("rider_id", StringType(), True),
-    StructField("first", StringType(), True),
-    StructField("last", StringType(), True),
-    StructField("address", StringType(), True),
-    StructField("birthday", StringType(), True),
-    StructField("account_start", StringType(), True),
-    StructField("account_end", StringType(), True),
-    StructField("is_member", StringType(), True)
-])
+rider_df = spark.createDataFrame(df, b_rider_schema)
 
 # COMMAND ----------
 
-## Silver Schema
+#create the empty files in a bronze folder
+trip_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Bronze/trip")
+payment_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Bronze/payment")
+station_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Bronze/station")
+rider_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Bronze/rider")
 
 # COMMAND ----------
 
-# define the schema for the trip table
-s_trip_schema = StructType([
-    StructField("trip_id", StringType(), True),
-    StructField("rideable_type", StringType(), True),
-    StructField("started_at", TimestampType(), True),
-    StructField("ended_at", TimestampType(), True),
-    StructField("start_station_id", StringType(), True),
-    StructField("end_station_id", StringType(), True),
-    StructField("rider_id", IntegerType(), True)
-])
-
-# define the schema for the payment table
-s_payment_schema = StructType([
-    StructField("payment_id", IntegerType(), True),
-    StructField("date", DateType(), True),
-    StructField("amount", FloatType(), True),
-    StructField("rider_id", IntegerType(), True)
-])
-
-# define the schema for the station table
-s_station_schema = StructType([
-    StructField("station_id", StringType(), True),
-    StructField("name", StringType(), True),
-    StructField("longitude", FloatType(), True),
-    StructField("latitude", FloatType(), True)
-])
-
-# define the schema for the rider table
-s_rider_schema = StructType([
-    StructField("rider_id", IntegerType(), True),
-    StructField("first", StringType(), True),
-    StructField("last", StringType(), True),
-    StructField("address", StringType(), True),
-    StructField("birthday", DateType(), True),
-    StructField("account_start", DateType(), True),
-    StructField("account_end", DateType(), True),
-    StructField("is_member", BooleanType(), True)
-])
+# MAGIC %md ## Silver
 
 # COMMAND ----------
 
-## Gold Schema
+# create empty df
+from pyspark.sql.types import *
+
+df = sc.emptyRDD()
+
+s_trip_df = spark.createDataFrame(df, s_trip_schema)
+
+s_payment_df = spark.createDataFrame(df, s_payment_schema)
+
+s_station_df = spark.createDataFrame(df, s_station_schema)
+
+s_rider_df = spark.createDataFrame(df, s_rider_schema)
 
 # COMMAND ----------
 
-g_trip_schema = StructType([
-    StructField("trip_id", StringType(), True),
-    StructField("rider_id", IntegerType(), True),
-    StructField("bike_id", IntegerType(), True),
-    StructField("start_station_id", StringType(), True),
-    StructField("end_station_id", StringType(), True),
-    StructField("started_at_date_id", IntegerType(), True),
-    StructField("ended_at_date_id", IntegerType(), True),
-    StructField("started_at_time_id", IntegerType(), True),
-    StructField("ended_at_time_id", IntegerType(), True),
-    StructField("rider_age", IntegerType(), True),
-    StructField("trip_duration", IntegerType(), True)
-])
+# write to silver
+s_trip_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/trip")
+s_payment_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/payment")
+s_station_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/station")
+s_rider_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/rider")
 
-g_payment_schema = StructType([
-    StructField("payment_id", IntegerType(), True),
-    StructField("rider_id", IntegerType(), True),
-    StructField("date_id", IntegerType(), True),
-    StructField("amount", FloatType(), True)
-])
-g_rider_schema = StructType([
-    StructField("rider_id", IntegerType(), True),
-    StructField("first", StringType(), True),
-    StructField("last", StringType(), True),
-    StructField("address", StringType(), True),
-    StructField("birthday", DateType(), True),
-    StructField("account_start", DateType(), True),
-    StructField("account_end", DateType(), True),
-    StructField("is_member", BooleanType(), True)
-])
+# COMMAND ----------
 
-g_station_schema = StructType([
-    StructField("station_id", StringType(), True),
-    StructField("name", StringType(), True),
-    StructField("longitude", FloatType(), True),
-    StructField("latitude", FloatType(), True)
-])
+# MAGIC %md ## Gold
 
-g_bike_schema = StructType([
-    StructField("bike_id", IntegerType(), True),
-    StructField("rideable_type", StringType(), True)  
-])
+# COMMAND ----------
 
-g_date_schema = StructType([
-    StructField("date_id", IntegerType(), True),
-    StructField("date", DateType(), True)    
-])
+# create empty df
+from pyspark.sql.types import *
 
-g_time_schema = StructType([
-    StructField("time_id", IntegerType(), True),
-    StructField("time", StringType(), True)    
-])
+df = sc.emptyRDD()
+
+trip_fact = spark.createDataFrame(df, g_trip_schema)
+payment_fact = spark.createDataFrame(df, g_payment_schema)
+
+bike_dim = spark.createDataFrame(df, g_bike_schema)
+date_dim = spark.createDataFrame(df, g_date_schema)
+time_dim = spark.createDataFrame(df, g_time_schema)
+rider_dim = spark.createDataFrame(df, g_rider_schema)
+station_dim = spark.createDataFrame(df, g_station_schema)
+
+# COMMAND ----------
+
+trip_fact.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/fact_trip")
+payment_fact.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/fact_payment")
+
+bike_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_bike")
+date_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_date")
+time_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_time")
+rider_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_rider")
+station_dim.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/dim_station")
 
 # COMMAND ----------
 

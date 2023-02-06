@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/SchemaCreation
+# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/Schemas
 
 # COMMAND ----------
 
@@ -46,3 +46,7 @@ s_trip_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/trip"
 s_payment_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/payment")
 s_station_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/station")
 s_rider_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/rider")
+
+# COMMAND ----------
+
+
