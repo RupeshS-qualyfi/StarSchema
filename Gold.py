@@ -158,7 +158,6 @@ bike_dim, date_dim, time_dim, station_dim, rider_dim, trip_fact, payment_fact = 
 # COMMAND ----------
 
 def write_to_gold():
-    dbutils.fs.rm("/tmp/Rupesh/Gold/", True)
     trip_fact.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/fact_trip")
     payment_fact.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Gold/fact_payment")
 

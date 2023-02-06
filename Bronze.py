@@ -17,8 +17,7 @@ rider_df = spark.read.csv("/tmp/Rupesh/landing1/riders.csv", schema = rider_sche
 
 # COMMAND ----------
 
-# delete the bronze folder if it exists
-dbutils.fs.rm('/tmp/Rupesh/Bronze/', True)
+
 
 # COMMAND ----------
 

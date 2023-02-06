@@ -41,11 +41,6 @@ s_rider_df = rider_df.select(*(rider_df[c].cast(s_rider_schema[i].dataType).alia
 
 # COMMAND ----------
 
-# delete the Silver folder if it exists
-dbutils.fs.rm('/tmp/Rupesh/Silver/', True)
-
-# COMMAND ----------
-
 # write to silver
 s_trip_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/trip")
 s_payment_df.write.format("delta").mode("overwrite").save("/tmp/Rupesh/Silver/payment")
