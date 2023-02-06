@@ -3,7 +3,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/BusinessQuestions
+# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/notebooks/BusinessQuestions
 
 # COMMAND ----------
 

@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/Schemas
+# MAGIC %run /Repos/rupesh.shrestha@qualyfi.co.uk/StarSchema/notebooks/Schemas
 
 # COMMAND ----------
 
