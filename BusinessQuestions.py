@@ -12,7 +12,7 @@ station_dim = spark.read.format("delta").load("/tmp/Rupesh/Gold/dim_station")
 
 ## Analyse how much time is spent per ride
 from pyspark.sql.functions import date_format, datediff
-from pyspark.sql.functions import col, avg, sum, round, quarter, countDistinct
+from pyspark.sql.functions import col, avg, sum, round, quarter, countDistinct, count
 from pyspark.sql.functions import hour
 import math
 
@@ -27,6 +27,7 @@ def time_per_ride_day_of_week():
     dow_grouped = dow.groupBy('date').agg(avg('trip_duration'))
     dow_grouped = dow_grouped.withColumnRenamed('date', 'day_of_week')
     return dow_grouped
+time_per_ride_day_of_week().display()
 
 # COMMAND ----------
 
@@ -38,6 +39,8 @@ def time_per_ride_hour():
     hr_grouped = hr.groupBy('time').agg(avg('trip_duration'))
     hr_grouped = hr_grouped.withColumnRenamed('time', 'hour_of_day').withColumnRenamed('avg(trip_duration)', 'average_trip_duration_minutes')
     return hr_grouped
+  
+time_per_ride_hour().display()
 
 # COMMAND ----------
 
@@ -47,6 +50,8 @@ def time_per_start_station():
     start_stns = stns.groupBy('start_station_id').agg(avg('trip_duration'))
     start_stns = start_stns.join(station_dim, start_stns.start_station_id == station_dim.station_id, how='left').select('name', 'avg(trip_duration)').withColumnRenamed('name', 'start_station')
     return start_stns
+  
+time_per_start_station().display()
 
 # COMMAND ----------
 
@@ -55,6 +60,8 @@ def time_per_end_station():
     end_stns = stns.groupBy('end_station_id').agg(avg('trip_duration'))
     end_stns = end_stns.join(station_dim, end_stns.end_station_id == station_dim.station_id, how='left').select('name', 'avg(trip_duration)').withColumnRenamed('name', 'end_station')
     return end_stns
+  
+time_per_end_station().display()
 
 # COMMAND ----------
 
@@ -63,6 +70,8 @@ def time_per_age():
     age = trip_fact.groupBy('rider_age').agg(avg('trip_duration'))
     return age
 
+time_per_age().display()
+
 # COMMAND ----------
 
 ## Based on whether the rider is a member or a casual rider
@@ -70,6 +79,8 @@ def time_per_membership():
     member = trip_fact.join(rider_dim, on='rider_id', how='left').select('trip_duration', 'is_member')
     member_grouped = member.groupBy('is_member').agg(avg('trip_duration'))
     return member_grouped
+  
+time_per_membership().display()
 
 # COMMAND ----------
 
@@ -84,6 +95,8 @@ def money_per_month():
     per_month_grouped = per_month1.groupBy('month').agg(sum('amount'))
     per_month_grouped = per_month_grouped.withColumn('sum(amount)', round(col('sum(amount)'), 2))
     return per_month_grouped
+  
+money_per_month().display()
 
 # COMMAND ----------
 
@@ -94,6 +107,8 @@ def money_per_quarter():
     perQ = perQ.groupBy('quarter').agg(sum('amount'))
     perQ = perQ.withColumn('sum(amount)', round(col('sum(amount)'), 2))
     return perQ
+  
+money_per_quarter().display()
 
 # COMMAND ----------
 
@@ -104,6 +119,8 @@ def money_per_year():
     py_grouped = py.groupBy('year').agg(sum('amount'))
     py_grouped = py_grouped.withColumn('sum(amount)', round(col('sum(amount)'), 2))
     return py_grouped
+  
+money_per_year().display()
 
 # COMMAND ----------
 
@@ -114,6 +131,8 @@ def money_per_member():
     ar_grouped = ar.groupBy('age_at_start').agg(sum('amount'))
     ar_grouped = ar_grouped.withColumn('sum(amount)', round(col('sum(amount)'), 2))
     return ar_grouped
+  
+money_per_member().display()
 
 # COMMAND ----------
 
@@ -129,13 +148,18 @@ def money_based_on_rides():
     
     members_trip = r.join(m, on='rider_id', how='left').filter(col('is_member')==True)
     members_trip = members_trip.join(p, on='rider_id', how='left')#.filter(col('started_at_date_id')==col('date_id'))
-    members_trip = members_trip.join(date_dim, members_trip.started_at_date_id == date_dim.date_id, how='left').drop('date_id', 'started_at_date_id', 'is_member')
+    members_trip = members_trip.join(date_dim, members_trip.started_at_date_id == date_dim.date_id, how='left').drop('date_id', 'is_member')
+    
     members_trip = members_trip.withColumn('month', date_format(col('date'), 'MMMM'))
     members_trip = members_trip.withColumn('year', date_format(col('date'), 'yyyy'))
-    members_trip = members_trip.groupBy('rider_id', 'month', 'year').agg(sum('amount'), countDistinct('rider_id'))
+    
+    members_trip = members_trip.groupBy('rider_id', 'month', 'year', 'started_at_date_id').agg(sum('amount'))
+    members_trip = members_trip.groupBy('rider_id', 'month', 'year').agg(avg('sum(amount)'), count('rider_id'))
+    
     members_trip = members_trip.withColumnRenamed('count(rider_id)', 'number_of_rides')
-    members_trip = members_trip.withColumnRenamed('sum(amount)', 'sum_amount_till_now')
+    members_trip = members_trip.withColumnRenamed('avg(sum(amount))', 'sum_amount_till_now')
     return members_trip
+
 money_based_on_rides().display()
 
 # COMMAND ----------
@@ -149,11 +173,17 @@ def money_based_on_minutes():
     members_trip = r.join(m, on='rider_id', how='left').filter(col('is_member')==True)
     members_trip = members_trip.join(p, on='rider_id', how='left')#.filter(col('started_at_date_id')==col('date_id'))
     members_trip = members_trip.join(date_dim, members_trip.started_at_date_id == date_dim.date_id, how='left').drop('date_id', 'started_at_date_id', 'is_member')
+    
     members_trip = members_trip.withColumn('month', date_format(col('date'), 'MMMM'))
     members_trip = members_trip.withColumn('year', date_format(col('date'), 'yyyy'))
+    
     members_trip = members_trip.groupBy('rider_id', 'month', 'year', 'trip_duration').agg(sum('amount'))
+    members_trip = members_trip.groupBy('rider_id', 'month', 'year', 'sum(amount)').agg(sum('trip_duration'))
+    
     members_trip = members_trip.withColumnRenamed('sum(amount)', 'sum_amount_till_now')
     return members_trip
+  
+money_based_on_minutes().display()
 
 # COMMAND ----------
 
