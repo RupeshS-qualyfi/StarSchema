@@ -101,7 +101,58 @@ s_rider_schema = StructType([
 
 # COMMAND ----------
 
+g_trip_schema = StructType([
+    StructField("trip_id", StringType(), True),
+    StructField("rider_id", IntegerType(), True),
+    StructField("bike_id", IntegerType(), True),
+    StructField("start_station_id", StringType(), True),
+    StructField("end_station_id", StringType(), True),
+    StructField("started_at_date_id", IntegerType(), True),
+    StructField("ended_at_date_id", IntegerType(), True),
+    StructField("started_at_time_id", IntegerType(), True),
+    StructField("ended_at_time_id", IntegerType(), True),
+    StructField("rider_age", IntegerType(), True),
+    StructField("trip_duration", IntegerType(), True)
+])
 
+g_payment_schema = StructType([
+    StructField("payment_id", IntegerType(), True),
+    StructField("rider_id", IntegerType(), True),
+    StructField("date_id", IntegerType(), True),
+    StructField("amount", FloatType(), True)
+])
+g_rider_schema = StructType([
+    StructField("rider_id", IntegerType(), True),
+    StructField("first", StringType(), True),
+    StructField("last", StringType(), True),
+    StructField("address", StringType(), True),
+    StructField("birthday", DateType(), True),
+    StructField("account_start", DateType(), True),
+    StructField("account_end", DateType(), True),
+    StructField("is_member", BooleanType(), True)
+])
+
+g_station_schema = StructType([
+    StructField("station_id", StringType(), True),
+    StructField("name", StringType(), True),
+    StructField("longitude", FloatType(), True),
+    StructField("latitude", FloatType(), True)
+])
+
+g_bike_schema = StructType([
+    StructField("bike_id", IntegerType(), True),
+    StructField("rideable_type", StringType(), True)  
+])
+
+g_date_schema = StructType([
+    StructField("date_id", IntegerType(), True),
+    StructField("date", DateType(), True)    
+])
+
+g_time_schema = StructType([
+    StructField("time_id", IntegerType(), True),
+    StructField("time", StringType(), True)    
+])
 
 # COMMAND ----------
 

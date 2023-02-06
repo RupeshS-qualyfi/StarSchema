@@ -27,7 +27,7 @@ s_rider_df = spark.read.format("delta").load("/tmp/Rupesh/Silver/rider")
 def make_bike_dimension():
     bikes = s_trip_df.select('rideable_type').distinct()
     w = Window.orderBy('rideable_type')
-    bike_dim = bikes.withColumn('bike_id', F.row_number().over(w)).select('bike_id', 'Rideable_type')
+    bike_dim = bikes.withColumn('bike_id', F.row_number().over(w)).select('bike_id', 'rideable_type')
     return bike_dim
 
 # COMMAND ----------

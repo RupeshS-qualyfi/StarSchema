@@ -12,7 +12,7 @@ station_dim = spark.read.format("delta").load("/tmp/Rupesh/Gold/dim_station")
 
 ## Analyse how much time is spent per ride
 from pyspark.sql.functions import date_format, datediff
-from pyspark.sql.functions import col, avg, sum, round, quarter
+from pyspark.sql.functions import col, avg, sum, round, quarter, countDistinct
 from pyspark.sql.functions import hour
 import math
 
@@ -117,7 +117,43 @@ def money_per_member():
 
 # COMMAND ----------
 
+## EXTRA CREDIT - Analyze how much money is spent per member
 
+# COMMAND ----------
+
+## based on how many rides the rider averages per month
+def money_based_on_rides():
+    r = trip_fact.select('rider_id', 'started_at_date_id')
+    m = rider_dim.select('rider_id', 'is_member')
+    p = payment_fact.select('rider_id', 'amount')
+    
+    members_trip = r.join(m, on='rider_id', how='left').filter(col('is_member')==True)
+    members_trip = members_trip.join(p, on='rider_id', how='left')#.filter(col('started_at_date_id')==col('date_id'))
+    members_trip = members_trip.join(date_dim, members_trip.started_at_date_id == date_dim.date_id, how='left').drop('date_id', 'started_at_date_id', 'is_member')
+    members_trip = members_trip.withColumn('month', date_format(col('date'), 'MMMM'))
+    members_trip = members_trip.withColumn('year', date_format(col('date'), 'yyyy'))
+    members_trip = members_trip.groupBy('rider_id', 'month', 'year').agg(sum('amount'), countDistinct('rider_id'))
+    members_trip = members_trip.withColumnRenamed('count(rider_id)', 'number_of_rides')
+    members_trip = members_trip.withColumnRenamed('sum(amount)', 'sum_amount_till_now')
+    return members_trip
+money_based_on_rides().display()
+
+# COMMAND ----------
+
+## Based on how many minutes the rider spends on a bike per month
+def money_based_on_minutes():
+    r = trip_fact.select('rider_id', 'started_at_date_id', 'trip_duration')
+    m = rider_dim.select('rider_id', 'is_member')
+    p = payment_fact.select('rider_id', 'amount')
+    
+    members_trip = r.join(m, on='rider_id', how='left').filter(col('is_member')==True)
+    members_trip = members_trip.join(p, on='rider_id', how='left')#.filter(col('started_at_date_id')==col('date_id'))
+    members_trip = members_trip.join(date_dim, members_trip.started_at_date_id == date_dim.date_id, how='left').drop('date_id', 'started_at_date_id', 'is_member')
+    members_trip = members_trip.withColumn('month', date_format(col('date'), 'MMMM'))
+    members_trip = members_trip.withColumn('year', date_format(col('date'), 'yyyy'))
+    members_trip = members_trip.groupBy('rider_id', 'month', 'year', 'trip_duration').agg(sum('amount'))
+    members_trip = members_trip.withColumnRenamed('sum(amount)', 'sum_amount_till_now')
+    return members_trip
 
 # COMMAND ----------
 
