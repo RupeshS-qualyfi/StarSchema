@@ -128,7 +128,7 @@ Q3) EXTRA CREDIT - Analyse how much money is spent per member:
    
    ## Automated Tests
    
-   The notebook 'Assertions.py` asserts that everything was done correctly by checking the coucomes of the `BusinessQuestions.py` notebook. It firstly checks that the gold schemas are applied correctly using the following function: 
+   The notebook `Assertions.py` asserts that everything was done correctly by checking the outcomes of the `BusinessQuestions.py` notebook. It firstly checks that the gold schemas are applied correctly using the following function: 
    
    ```python
       def assert_gold_schemas():
