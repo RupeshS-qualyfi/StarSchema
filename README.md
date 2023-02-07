@@ -19,7 +19,7 @@ The schema was designed by the following three steps:
    <summary>Conceptual Database Design</summary>
 
    ><p align="center">
-   ><img src="https://raw.githubusercontent.com/steviedas/StarSchemaProject/main/pictures/ConceptualDatabaseDesign.png"
+   ><img src="https://raw.githubusercontent.com/RupeshS-qualyfi/StarSchema/main/pictures/ConceptualDatabaseDesign.png"
    >  alt="Size Limit comment in pull request about bundle size changes"
    >  width="960" height="540">
    ></p>
@@ -31,7 +31,7 @@ The schema was designed by the following three steps:
    <summary>Logical Database Design</summary>
 
    ><p align="center">
-   ><img src="https://raw.githubusercontent.com/steviedas/StarSchemaProject/main/pictures/LogicalDatabaseDesign.png"
+   ><img src="https://raw.githubusercontent.com/RupeshS-qualyfi/StarSchema/main/pictures/LogicalDatabaseDesign.png"
    >  alt="Size Limit comment in pull request about bundle size changes"
    >  width="960" height="540"
    ></p>
@@ -43,7 +43,7 @@ The schema was designed by the following three steps:
    <summary>Physical Database Design</summary>
 
    ><p align="center">
-   ><img src="https://raw.githubusercontent.com/steviedas/StarSchemaProject/main/pictures/PhysicalDatabaseDesign.png"
+   ><img src="https://raw.githubusercontent.com/RupeshS-qualyfi/StarSchema/main/pictures/PhysicalDatabaseDesign.png"
    >  alt="Size Limit comment in pull request about bundle size changes"
    >  width="960" height="540"
    ></p>
