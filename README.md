@@ -15,7 +15,7 @@
 
 This project consists of using data from a bike sharing program and converting it into a Star Schema database format which allows anyone accessing the database to query the data efficiently to answer a variety of business questions. The bike sharing program allows costumers to rent a bike at any station owned by the business and ride the bike around the city for an amount of time before returning the bike at any station (the same or different).
 
-The star schema was designed using 4 raw csv files which were stored as seperate '.zip' files in the folder `csvs` as shown on the below table:
+The star schema was designed using 4 raw csv files which were stored as seperate `.zip` files in the folder `csvs` as shown on the below table:
 
 .zip          | .csv
 ------------- | -------------
@@ -66,34 +66,34 @@ The schema was designed by the following three steps:
    
    ## Methodology
    
-   The whole workflow consisted of 5 seperate notebooks contained in the folder 'notebooks', each of which is described as follows:
+   The whole workflow consisted of 5 seperate notebooks contained in the folder `notebooks`, each of which is described as follows:
    
    ### 1_DestroySchemas.py
    
-   This notebook simply destroys any database already located in the DBFS path specified:
+   This notebook simply destroys any database already located in the `DBFS` path specified:
    ```python
    dbutils.fs.rm("/tmp/Rupesh/", True)
    ```
    
    ### 2_SchemaCreation.py
    
-   Each of the schemas for the bronze, silver and gold medallion which are declared in the notebook 'Schemas.py' are read and an empty database was created for each and stored in their respective containers. 
+   Each of the schemas for the bronze, silver and gold medallion which are declared in the notebook `Schemas.py` are read and an empty database was created for each and stored in their respective containers. 
    
    ### 3_Bronze.py
    
-   This notebook first gets the zipped files from the github repo and stored them in the DBFS folder 'zipped_files' using '!wget' as follows
+   This notebook first gets the zipped files from the github repo and stored them in the `DBFS` folder `zipped_files` using `!wget` as follows
    
    ```python
    !wget 'https://github.com/RupeshS-qualyfi/StarSchema/raw/main/csvs/payments.zip' -P '/dbfs/tmp/Rupesh/zipped_files'
    ```
    
-   Then it creates a 'landing' folder for the '.csv' files to be extracted into as follows
+   Then it creates a `landing` folder for the `.csv` files to be extracted into as follows
    
    ```python
    unzip /dbfs/tmp/Rupesh/zipped_files/trips.zip -d /dbfs/tmp/Rupesh/landing
    ```
    
-   It then creates the files in the bronze folder after reading the '.csv' files and applying the schemas from the 'Schemas.py' file. 
+   It then creates the files in the bronze folder after reading the `.csv` files and applying the schemas from the `Schemas.py` file. 
    
    ```python
    trip_df = spark.read.csv("/tmp/Rupesh/landing/trips.csv", schema = b_trip_schema)
@@ -102,7 +102,7 @@ The schema was designed by the following three steps:
    
    ### 4_Silver.py
    
-   This notebook follows a similar structure to '3_bronze.py' and stores the new delta tables with the silver schema in the silver folder.
+   This notebook follows a similar structure to `3_bronze.py` and stores the new delta tables with the silver schema in the silver folder.
    
    ### 5_Gold.py
    
@@ -110,7 +110,7 @@ The schema was designed by the following three steps:
    
    ## Business Outcomes
    
-   After the whole cvhema has been applied, the business questions that the 'BusinessQuestions.py' notebook answers are as follows: 
+   After the whole schema has been applied, the business questions that the `BusinessQuestions.py` notebook answers are as follows: 
    
    Q1) Analyse how much time is spent per ride:
 * a) Based on date and time factors such as day of week and time of day
@@ -128,7 +128,7 @@ Q3) EXTRA CREDIT - Analyse how much money is spent per member:
    
    ## Automated Tests
    
-   The notebook 'Assertions.py' asserts that everything was done correctly by checking the coucomes of the 'BusinessQuestions.py' notebook. It firstly checks that the gold schemas are applied correctly using the following function: 
+   The notebook 'Assertions.py` asserts that everything was done correctly by checking the coucomes of the `BusinessQuestions.py` notebook. It firstly checks that the gold schemas are applied correctly using the following function: 
    
    ```python
       def assert_gold_schemas():
