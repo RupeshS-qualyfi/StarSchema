@@ -50,3 +50,9 @@ The schema was designed by the following three steps:
    >
    
    </details>
+   
+   ## Methodology
+   
+   The whole workflow consisted of 5 seperate notebooks each of which is described as follows:
+   
+   ### Notebook 1: 'DestroySchemas.py'
