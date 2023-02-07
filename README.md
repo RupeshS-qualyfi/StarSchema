@@ -3,10 +3,10 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/RupeshS-qualyfi/StarSchema)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/RupeshS-qualyfi/StarSchema)
 
-[Intro](#introduction)|
-[Design](#designing-the-schema)|
-[Method](#methododology)|
-[Business Outcomes](#business-outcomes)|
+[Intro](#introduction)•
+[Design](#designing-the-schema)•
+[Method](#methododology)•
+[Business Outcomes](#business-outcomes)•
 [Automated Tests](#automated-tests)
 
 
