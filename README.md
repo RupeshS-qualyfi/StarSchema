@@ -1,5 +1,18 @@
 # StarSchema
 
+![GitHub last commit](https://img.shields.io/github/last-commit/RupeshS-qualyfi/StarSchema)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/RupeshS-qualyfi/StarSchema)
+
+[Intro](#introduction)
+[Design](#designing-the-schema)
+[Method](#methododology)
+[Business Outcomes](#business-outcomes)
+[Automated Tests](#automated-tests)
+
+
+
+## Introduction
+
 This project consists of using data from a bike sharing program and converting it into a Star Schema database format which allows anyone accessing the database to query the data efficiently to answer a variety of business questions. The bike sharing program allows costumers to rent a bike at any station owned by the business and ride the bike around the city for an amount of time before returning the bike at any station (the same or different).
 
 The star schema was designed using 4 raw csv files which were stored as seperate .zip files in the folder `csvs` as shown on the below table:
@@ -112,7 +125,6 @@ Q2) Analyse how much money is spent:
 Q3) EXTRA CREDIT - Analyse how much money is spent per member:
 * a) Based on how many rides the rider averages per month
 * b) Based on how many minutes the rider spends on a bike per month
-   
    
    ## Automated Tests
    
